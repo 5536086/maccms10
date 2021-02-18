@@ -12,15 +12,24 @@ class System extends Base
     {
         $post = input();
         $conf = [
-            'host' => $post['host'],
-            'username' => $post['username'],
-            'password' => $post['password'],
-            'port' => $post['port'],
             'nick' => $post['nick'],
-            'test' => $post['test'],
         ];
+        $type = strtolower($post['type']);
+        $to = $post['test'];
+        $conf['host'] = $GLOBALS['config']['email'][$type]['host'];
+        $conf['port'] = $GLOBALS['config']['email'][$type]['port'];
+        $conf['username'] = $GLOBALS['config']['email'][$type]['username'];
+        $conf['password'] = $GLOBALS['config']['email'][$type]['password'];
+        $conf['secure'] = $GLOBALS['config']['email'][$type]['secure'];
         $this->label_maccms();
-        $res = mac_send_mail($conf['test'], $GLOBALS['config']['email']['tpl']['test_title'], $GLOBALS['config']['email']['tpl']['test_body'], $conf);
+
+        $title = $GLOBALS['config']['email']['tpl']['test_title'];
+        $msg = $GLOBALS['config']['email']['tpl']['test_body'];
+        $code = mac_get_rndstr(6,'num');
+        View::instance()->assign(['code'=>$code,'time'=>$GLOBALS['config']['email']['time']]);
+        $title =  View::instance()->display($title);
+        $msg =  View::instance()->display($msg);
+        $res = mac_send_mail($to, $title, $msg, $conf);
         if ($res['code']==1) {
             return json(['code' => 1, 'msg' => lang('test_ok')]);
         }
@@ -450,6 +459,7 @@ class System extends Base
             }
             unset($config['__token__']);
 
+
             $config_new['sms'] = $config['sms'];
 
             $config_old = config('maccms');
@@ -461,11 +471,11 @@ class System extends Base
             }
             return $this->success(lang('save_ok'));
         }
+        $this->assign('config', config('maccms'));
 
         $extends = mac_extends_list('sms');
         $this->assign('extends',$extends);
 
-        $this->assign('config', config('maccms'));
         $this->assign('title', lang('admin/system/configsms/title'));
         return $this->fetch('admin@system/configsms');
     }

@@ -387,62 +387,12 @@ class User extends Base
             return json(['code' => 0, 'msg' => lang('index/portrait_tip1')]);
         }
 
-        $file = request()->file('file');
-        if (empty($file)) {
-            return json(['code' => 0, 'msg' => lang('index/portrait_no_upload')]);
-        }
-
-        $upload_image_ext = 'jpg,png,gif';
-        if ($file->checkExt($upload_image_ext)) {
-            $type = 'image';
-        } else {
-            return json(['code' => 0, 'msg' => lang('index/portrait_ext')]);
-        }
-
-        $uniq = $GLOBALS['user']['user_id'] % 10;
-        // 上传附件路径
-        $_upload_path = ROOT_PATH . 'upload' . '/user/' . $uniq . '/';
-        // 附件访问路径
-        $_save_path = 'upload' . '/user/' . $uniq . '/';
-        $_save_name = $GLOBALS['user']['user_id'] . '.jpg';
-
-        if (!file_exists($_save_path)) {
-            mac_mkdirss($_save_path);
-        }
-
-        $upfile = $file->move($_upload_path, $_save_name);
-        if (!is_file($_upload_path . $_save_name)) {
-            return json(['code' => 0, 'msg' => lang('index/upload_err')]);
-        }
-        $file = $_save_path . str_replace('\\', '/', $_save_name);
-        $config = [
-            'thumb_type' => 6,
-            'thumb_size' => $GLOBALS['config']['user']['portrait_size'],
-        ];
-
-        $new_thumb = $GLOBALS['user']['user_id'] . '.jpg';
-        $new_file = $_save_path . $new_thumb;
-        try {
-
-            $image = \think\Image::open('./' . $file);
-            $t_size = explode('x', strtolower($GLOBALS['config']['user']['portrait_size']));
-            if (!isset($t_size[1])) {
-                $t_size[1] = $t_size[0];
-            }
-            $res = $image->thumb($t_size[0], $t_size[1], 6)->save('./' . $new_file);
-
-            $update = [];
-            $update['user_portrait'] = $new_file;
-            $where = [];
-            $where['user_id'] = $GLOBALS['user']['user_id'];
-            $res = model('User')->where($where)->update($update);
-            if ($res === false) {
-                return json(['code' => 0, 'msg' => lang('index/portrait_err')]);
-            }
-            return json(['code' => 1, 'msg' => 'ok', 'file' =>  '' . MAC_PATH . $new_file . '?' . mt_rand(1, 9999)]);
-        } catch (\Exception $e) {
-            return json(['code' => 0, 'msg' => lang('index/portrait_thumb_err')]);
-        }
+        $param=[];
+        $param['input'] = 'file';
+        $param['flag'] = 'user';
+        $param['user_id'] = $GLOBALS['user']['user_id'];
+        $res = model('Upload')->upload($param);
+        return json($res);
     }
 
     public function findpass()
@@ -614,7 +564,7 @@ class User extends Base
         $this->assign('type_tree', $type_tree);
 
         $n = 1;
-        $ids = [1 => lang('index/page_type'), 2 => lang('index/page_detail'), 3 => lang('index/page_play'), 4 => lang('index/page_down'), '5' => lang('index/trysee')];
+        $ids = [1 => lang('index/page_type'), 2 => lang('index/page_detail'), 3 => lang('index/page_play'), 4 => lang('index/page_down'), '5' => lang('index/try_see')];
         foreach ($type_tree as $k1 => $v1) {
             unset($type_tree[$k1]['type_extend']);
             foreach ($ids as $a => $b) {
