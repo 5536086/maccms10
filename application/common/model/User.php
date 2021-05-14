@@ -615,7 +615,7 @@ class User extends Base
         }
 
         $where=[];
-        $where['user_id'] = $GLOBALS['user']['user_id'];
+        $where['user_id'] = intval($GLOBALS['user']['user_id']);
         $where['msg_time'] = ['gt',$stime];
         $where['msg_code'] = ['eq',$param['code']];
         $where['msg_type'] = ['eq', $param['type'] ];
@@ -655,9 +655,10 @@ class User extends Base
             $stime = strtotime('-'.$GLOBALS['config']['email']['time'].' min');
         }
         $where=[];
-        $where['user_id'] = $GLOBALS['user']['user_id'];
+        $where['user_id'] = intval($GLOBALS['user']['user_id']);
         $where['msg_time'] = ['gt',$stime];
         $where['msg_type'] = ['eq', $param['type'] ];
+        $where['msg_to'] = ['eq', $param['to'] ];
         $res = model('msg')->infoData($where);
         if($res['code'] ==1){
             return ['code'=>9002,'msg'=>lang('model/user/do_not_send_frequently')];
@@ -683,7 +684,7 @@ class User extends Base
         
         if($res_code==1){
             $data=[];
-            $data['user_id'] = $GLOBALS['user']['user_id'];
+            $data['user_id'] = intval($GLOBALS['user']['user_id']);
             $data['msg_type'] = $param['type'];
             $data['msg_status'] = 0;
             $data['msg_to'] = $to;
@@ -912,7 +913,7 @@ class User extends Base
                     if($r){
                         $data = [];
                         $data['user_id'] = $GLOBALS['user']['user_pid_2'];
-                        $data['plog_type'] = 4;
+                        $data['plog_type'] = 5;
                         $data['plog_points'] = $points;
                         $data['plog_remarks'] =lang('model/user/reward_tip',[$GLOBALS['user']['user_id'],$GLOBALS['user']['user_name'],$fee_points,$points]);
                         model('Plog')->saveData($data);
@@ -928,7 +929,7 @@ class User extends Base
                     if($r){
                         $data = [];
                         $data['user_id'] = $GLOBALS['user']['user_pid_3'];
-                        $data['plog_type'] = 4;
+                        $data['plog_type'] = 6;
                         $data['plog_points'] = $points;
                         $data['plog_remarks'] = lang('model/user/reward_tip',[$GLOBALS['user']['user_id'],$GLOBALS['user']['user_name'],$fee_points,$points]);
                         model('Plog')->saveData($data);

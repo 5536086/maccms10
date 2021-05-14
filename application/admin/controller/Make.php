@@ -214,9 +214,12 @@ class Make extends Base
                 $_REQUEST['page'] = $i;
             }
 
-            $link = 'rss/'.$this->_param['ac2'].'.html';
+            $link = 'rss/'.$this->_param['ac2'];
+            if($par['page']>1){
+                $link .= $GLOBALS['config']['path']['page_sp'] . $par['page'];
+            }
+            $link .='.xml';
             $this->buildHtml($link,'./','rss/'.$this->_param['ac2']);
-
             $this->echoLink($link,'/'.$link);
         }
         if(ENTRANCE=='admin') {
@@ -896,6 +899,11 @@ class Make extends Base
         $GLOBALS['aid'] = mac_get_aid('label');
         if(empty($ids)){
             return $this->error(lang('param_err'));
+        }
+        $ids = str_replace('\\','/',$ids);
+        if( count( explode("./",$ids) ) > 1){
+            $this->error(lang('param_err').'2');
+            return;
         }
         if(!is_array($ids)){
             $ids = explode(',',$ids);
